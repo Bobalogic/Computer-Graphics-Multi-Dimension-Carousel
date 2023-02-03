@@ -29,3 +29,34 @@
         h3 {
             color: #E6BA95;
         }
+        h4 {
+            color: #E6BA95;
+        }
+        h5 {
+            color: #E6BA95;
+        }
+        h6 {
+            color: #E6BA95;
+        }
+        p {
+            color: #EFEAD8;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            background-color: #5F7161;
+        }
+        .header {
+            background-color: #5F7161;
+            color: #EFEAD8;
+            text-align: center;
+            padding: 20px;
+        }
+        .nav {
+            line-height: 30px;
+            background-color: #5F7161;
+            height: 300px;
+            width: 100px;
+            float: left;
+            padding: 5px;	      
+        }
