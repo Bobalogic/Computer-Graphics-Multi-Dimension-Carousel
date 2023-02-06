@@ -1,62 +1,69 @@
-        body {
-            background-color: #5F7161;
-            color: #EFEAD8;
-            font-family: Calibri;
-            
-        } 
-        a:visited {
-            color: #D0C9C0;
-            background-color: transparent;
-            text-decoration: none;
-        }
-/*
-        a:link {
-            background-color: transparent;
-            text-decoration: none;
-          }
-*/
-        hr {
-            background-color: none;
-            border-style: dotted none none;
-            border-width: 5px;
-            border-color: #E2DEA9;
-            width: 100%;
-            margin-left: 0;
-        }
-        h1 {
-            color: #E6BA95;
-        }
-        h3 {
-            color: #E6BA95;
-        }
-        h4 {
-            color: #E6BA95;
-        }
-        h5 {
-            color: #E6BA95;
-        }
-        h6 {
-            color: #E6BA95;
-        }
-        p {
-            color: #EFEAD8;
-        }
-        .container {
-            width: 100%;
-            margin: 0 auto;
-            background-color: #5F7161;
-        }
-        .header {
-            background-color: #5F7161;
-            color: #EFEAD8;
-            text-align: center;
-            padding: 20px;
-        }
-        .nav {
-            line-height: 30px;
-            background-color: #5F7161;
-            height: 300px;
-            width: 100px;
-            float: left;
-            padding: 5px;	      
-        }
+/* Definição das cores primária, secundária e terciária */
+:root {
+    --primary-color: #5F7161;
+    --secondary-color: #EFEAD8;
+    --tertiary-color: #E6BA95;
+}
+    
+/* Estilo para o body da página */
+body {
+background-color: var(--primary-color);
+color: var(--secondary-color);
+font-family: Calibri;
+}
+
+/* Estilo para links visitados */
+a:visited {
+color: #D0C9C0;
+background-color: transparent;
+text-decoration: none;
+}
+
+/* Estilo para linhas horizontais */
+hr {
+background-color: none;
+border-style: dotted none none;
+border-width: 5px;
+border-color: #E2DEA9;
+width: 100%;
+margin-left: 0;
+}
+
+/* Estilo para cabeçalhos h1, h3, h4, h5 e h6 */
+h1,
+h3,
+h4,
+h5,
+h6 {
+color: var(--tertiary-color);
+}
+
+/* Estilo para parágrafos */
+p {
+color: var(--secondary-color);
+}
+
+/* Classe container para centralizar elementos na tela */
+.container {
+width: 100%;
+margin: 0 auto;
+background-color: var(--primary-color);
+}
+
+/* Classe header para estilo do cabeçalho da página */
+.header {
+background-color: var(--primary-color);
+color: var(--secondary-color);
+text-align: center;
+padding: 20px;
+}
+
+/* Classe nav para estilo da barra de navegação */
+.nav {
+line-height: 30px;
+background-color: var(--primary-color);
+height: 300px;
+width: 100px;
+float: left;
+padding: 5px;
+}
