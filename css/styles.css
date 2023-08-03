@@ -1,69 +1,134 @@
 /* Definição das cores primária, secundária e terciária */
 :root {
-    --primary-color: #5F7161;
-    --secondary-color: #EFEAD8;
-    --tertiary-color: #E6BA95;
+  --primary-color: #5F7161;
+  --secondary-color: #EFEAD8;
+  --tertiary-color: #E6BA95;
 }
-    
+
+/* Reset styles for improved consistency */
+body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, table, td {
+  margin: 0;
+  padding: 0;
+}
+
 /* Estilo para o body da página */
 body {
-background-color: var(--primary-color);
-color: var(--secondary-color);
-font-family: Calibri;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  font-family: Calibri, sans-serif;
+  line-height: 1.6;
+  padding: 20px;
 }
 
 /* Estilo para links visitados */
 a:visited {
-color: #D0C9C0;
-background-color: transparent;
-text-decoration: none;
-}
-
-/* Estilo para linhas horizontais */
-hr {
-background-color: none;
-border-style: dotted none none;
-border-width: 5px;
-border-color: #E2DEA9;
-width: 100%;
-margin-left: 0;
+  color: #D0C9C0;
+  text-decoration: none;
 }
 
 /* Estilo para cabeçalhos h1, h3, h4, h5 e h6 */
-h1,
-h3,
-h4,
-h5,
-h6 {
-color: var(--tertiary-color);
+h1 {
+  color: var(--tertiary-color);
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  color: var(--tertiary-color);
+  font-size: 24px;
+  margin-bottom: 10px;
 }
 
 /* Estilo para parágrafos */
 p {
-color: var(--secondary-color);
+  color: var(--secondary-color);
+  margin-bottom: 10px;
 }
 
-/* Classe container para centralizar elementos na tela */
+/* Improve layout and alignment of the main content */
 .container {
-width: 100%;
-margin: 0 auto;
-background-color: var(--primary-color);
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-/* Classe header para estilo do cabeçalho da página */
+/* Improve styling of tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid var(--secondary-color);
+}
+
+thead th {
+  background-color: var(--tertiary-color);
+}
+
+/* Style the links in the main content */
+a {
+  color: var(--tertiary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Style the header */
 .header {
-background-color: var(--primary-color);
-color: var(--secondary-color);
-text-align: center;
-padding: 20px;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  text-align: center;
+  padding: 20px;
+  margin-bottom: 30px;
 }
 
-/* Classe nav para estilo da barra de navegação */
+/* Style the navigation bar */
 .nav {
-line-height: 30px;
-background-color: var(--primary-color);
-height: 300px;
-width: 100px;
-float: left;
-padding: 5px;
+  line-height: 30px;
+  background-color: var(--primary-color);
+  width: 100px;
+  float: left;
+  padding: 5px;
+}
+
+/* Improve the appearance of the unordered and ordered lists */
+ul, ol {
+  margin-left: 30px;
+}
+
+/* Add some spacing between list items */
+li {
+  margin-bottom: 5px;
+}
+
+/* Add some spacing between the sections */
+hr {
+  border: none;
+  border-bottom: 2px dotted var(--tertiary-color);
+  margin: 20px 0;
+}
+
+/* Add some styling for the projects section */
+h3 + ul {
+  margin-left: 20px;
+}
+
+/* Add a subtle shadow to the profile picture */
+img {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Style the links section */
+h3 + ul + hr + h3 + ul {
+  margin-top: 20px;
+}
+
+/* Add some styling for the hobbies and references sections */
+h3 + ol,
+h3 + ul + hr + h3 + ol {
+  margin-left: 20px;
 }
