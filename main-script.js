@@ -37,7 +37,7 @@ var ascending = [true, true, true, true, true, true];
 var descending = [false, false, false, false, false, false];
 var rotating = false;
 var clock = new THREE.Clock(true);
-var stereoCamera;
+
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -100,9 +100,9 @@ function createCameras() {
     camera.lookAt(scene.position);
     cameras.push(camera);  //Não percebo pq apaga e acende a luz também
 
-    var stereoCamera = new THREE.StereoCamera();
-    stereoCamera.aspect = 0.5;
-    stereoCamera.update(camera);
+    // var stereoCamera = new THREE.StereoCamera();
+    // stereoCamera.aspect = 0.5;
+    // stereoCamera.update(camera);
 }
   
 /////////////////////
@@ -648,14 +648,7 @@ function createCarrossel(x, y, z) {
 
     carrossel = new THREE.Object3D();
 
-    map = new THREE.TextureLoader().load("https://threejs.org/examples/textures/uv_grid_opengl.jpg");
-    map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.anisotropy = 16;
-    
-    material = new THREE.MeshPhongMaterial({
-        map: map,
-        side: THREE.DoubleSide
-    }); //TODO experimentar o MeshPhongMaterial
+    material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 
     addBaseCarrossel(carrossel, 0, 1, 0);
     addCilindroCentral(carrossel, 0, 9.5, 0);
@@ -761,22 +754,7 @@ function updateMaterial(){
 /////////////
 function render()  {
     // Update the StereoCamera with the active camera parameters
-    if (renderer.xr.isPresenting) {
-        // In VR mode, update the StereoCamera with the active camera parameters
-        if (cameras[activeCameraIndex] instanceof THREE.PerspectiveCamera) {
-            stereoCamera.update(cameras[activeCameraIndex]);
-
-            // Render the scene for both left and right cameras
-            renderer.render(scene, stereoCamera.cameraL);
-            renderer.render(scene, stereoCamera.cameraR);
-        } else {
-            // For other camera types in VR mode, just render the scene with the active camera
-            renderer.render(scene, cameras[activeCameraIndex]);
-        }
-    } else {
-        // In non-VR mode, just render the scene with the active camera
-        renderer.render(scene, cameras[activeCameraIndex]);
-    }
+    renderer.render(scene, camera);
 }
 
 ////////////////////////////////
