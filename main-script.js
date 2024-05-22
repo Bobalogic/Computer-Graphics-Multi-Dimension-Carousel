@@ -102,6 +102,7 @@ function createCameras() {
 
     var stereoCamera = new THREE.StereoCamera();
     stereoCamera.aspect = 0.5;
+    stereoCamera.update(camera);
 }
   
 /////////////////////
