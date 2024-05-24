@@ -1,0 +1,19 @@
+body {
+    margin: 0px;
+    background-color: #0095ff;
+    overflow: hidden;
+}
+
+#hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: Arial, sans-serif;
+    z-index: 100; /* Ensure HUD appears on top of canvas */
+}
+
+.highlight {
+    color: red;
+    transition: background-color 0.5s ease;
+}
