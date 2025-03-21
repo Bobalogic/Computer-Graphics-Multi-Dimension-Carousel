@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PTO Trip Planner</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --primary-dark: #4338ca;
+      --secondary: #f43f5e;
+      --bg-light: #f9fafb;
+      --text-dark: #1f2937;
+      --text-light: #6b7280;
+      --white: #ffffff;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+    
+    header {
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .login-container {
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      padding: 2rem;
+      max-width: 400px;
+      margin: 4rem auto;
+      text-align: center;
+    }
+    
+    .app-container {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .calendar-container,
+    .results-container {
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+    }
+    
+    /* Admin Controls styling */
+    #adminControls {
+      margin-bottom: 1rem;
+      display: none;
+      text-align: center;
+    }
+    
+    #adminControls button,
+    #adminControls select {
+      margin: 0.25rem;
+      background-color: var(--secondary);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background-color 0.2s;
+    }
+    
+    #adminControls button:hover {
+      background-color: #c53030;
+    }
+    
+    /* Heatmap grid: exactly 7 columns */
+    .availability-grid {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    
+    .availability-cell {
+      aspect-ratio: 1;
+      border-radius: 2px;
+      position: relative;
+    }
+    
+    .availability-date {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      font-size: 0.6rem;
+      color: var(--text-light);
+    }
+    
+    .availability-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 1rem 0;
+    }
+    
+    .month-selector {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    input {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
+      font-size: 1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      user-select: none;
+      background-color: var(--gray-100);
+      position: relative;
+      transition: background-color 0.15s ease;
+    }
+    
+    .day-header {
+      background-color: var(--primary-light);
+      color: var(--white);
+      font-weight: 600;
+      cursor: default;
+    }
+    
+    .inactive-day {
+      color: var(--gray-400);
+      background-color: var(--gray-200);
+      cursor: default;
+    }
+    
+    .selected-day {
+      background-color: var(--primary-light);
+      color: var(--white);
+    }
+    
+    .selected-day:hover {
+      background-color: var(--primary);
+    }
+    
+    .calendar-day:hover:not(.inactive-day):not(.day-header) {
+      background-color: var(--gray-300);
+    }
+    
+    .date-number {
+      font-size: 0.875rem;
+      position: absolute;
+      top: 4px;
+      left: 4px;
+    }
+    
+    .user-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .user-chip {
+      background-color: var(--primary-light);
+      color: var(--white);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    
+    .user-chip:hover {
+      transform: scale(1.05);
+    }
+    
+    .user-chip.active {
+      background-color: var(--primary-dark);
+      transform: scale(1.05);
+    }
+    
+    .week-row {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border-radius: 4px;
+      background-color: var(--gray-100);
+    }
+    
+    .week-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .match-score {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--white);
+      background-color: var(--secondary);
+    }
+    
+    .section-title {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    .logout-btn {
+      background-color: transparent;
+      color: var(--primary);
+      margin-top: 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .user-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .user-welcome {
+      font-weight: 500;
+    }
+    
+    /* Notification styling */
+    #saveNotification {
+      text-align: center;
+      color: green;
+      margin-top: 1rem;
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PTO Trip Planner</h1>
+  </header>
+  
+  <main>
+    <div class="login-container" id="loginContainer">
+      <h2 class="section-title">Welcome to PTO Trip Planner</h2>
+      <p style="margin-bottom: 1.5rem; color: var(--text-light);">
+        Enter your name to start planning your next trip!
+      </p>
+      <input type="text" id="usernameInput" placeholder="Enter your username" />
+      <button id="loginButton">Start Planning</button>
+    </div>
+    
+    <div class="app-container" id="appContainer">
+      <div class="calendar-container">
+        <div class="user-header">
+          <span class="user-welcome" id="userWelcome">Welcome, User!</span>
+          <button class="logout-btn" id="logoutButton">Sign Out</button>
+        </div>
+        <!-- Admin controls: only shown when logged in as admin123 -->
+        <div id="adminControls">
+          <button id="clearAvailabilityButton">
+            Clear All Non‑Admin Users
+          </button>
+          <br />
+          <select id="removeUserSelect"></select>
+          <button id="removeUserButton">
+            Remove Selected User
+          </button>
+        </div>
+        
+        <h2 class="section-title">Select Your Available Dates</h2>
+        
+        <div class="calendar-header">
+          <div class="month-selector">
+            <button id="prevMonth">&lt;</button>
+            <h3 id="currentMonth">March 2025</h3>
+            <button id="nextMonth">&gt;</button>
+          </div>
+        </div>
+        
+        <div class="calendar" id="calendar"></div>
+        
+        <button id="saveButton" style="margin-top: 1.5rem; width: 100%;">
+          Save My Availability
+        </button>
+        <div id="saveNotification">Availability saved.</div>
+      </div>
+      
+      <div class="results-container">
+        <h2 class="section-title">Group Availability</h2>
+        <!-- Removed empty Group View toggle; now only the heatmap is shown -->
+        <div class="month-selector">
+          <button id="prevMonthResults">&lt;</button>
+          <h3 id="currentMonthResults">March 2025</h3>
+          <button id="nextMonthResults">&gt;</button>
+        </div>
+        
+        <div id="heatmapContent">
+          <div class="availability-grid" id="availabilityGrid">
+            <!-- Heatmap cells will be added here -->
+          </div>
+          <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 20px; height: 20px; background-color: #edf2f7; border-radius: 2px;"></div>
+              <span style="font-size: 0.75rem; color: var(--text-light);">0%</span>
+              <div style="width: 20px; height: 20px; background-color: #c6f6d5; border-radius: 2px;"></div>
+              <span style="font-size: 0.75rem; color: var(--text-light);">~33%</span>
+              <div style="width: 20px; height: 20px; background-color: #9ae6b4; border-radius: 2px;"></div>
+              <span style="font-size: 0.75rem; color: var(--text-light);">~67%</span>
+              <div style="width: 20px; height: 20px; background-color: #2f855a; border-radius: 2px;"></div>
+              <span style="font-size: 0.75rem; color: var(--text-light);">100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <script>
+    // Store data in localStorage for simplicity.
+    const appKey = 'ptoTripPlanner';
+    let appData = {
+      users: {},
+      currentUser: null
+    };
+    
+    // Two separate date variables:
+    let currentDate = moment(); // For left calendar (user input)
+    let resultsDate = moment(); // For group availability (heatmap)
+    
+    // Load data
+    const loadData = () => {
+      const savedData = localStorage.getItem(appKey);
+      if (savedData) {
+        appData = JSON.parse(savedData);
+      }
+    };
+    
+    // Save data
+    const saveData = () => {
+      localStorage.setItem(appKey, JSON.stringify(appData));
+    };
+    
+    // DOM elements
+    const loginContainer = document.getElementById('loginContainer');
+    const appContainer = document.getElementById('appContainer');
+    const usernameInput = document.getElementById('usernameInput');
+    const loginButton = document.getElementById('loginButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const userWelcome = document.getElementById('userWelcome');
+    const saveButton = document.getElementById('saveButton');
+    const saveNotification = document.getElementById('saveNotification');
+    const userList = document.getElementById('userList');
+    const currentMonthElement = document.getElementById('currentMonth');
+    const currentMonthResultsElement = document.getElementById('currentMonthResults');
+    const prevMonthButton = document.getElementById('prevMonth');
+    const nextMonthButton = document.getElementById('nextMonth');
+    const prevMonthResultsButton = document.getElementById('prevMonthResults');
+    const nextMonthResultsButton = document.getElementById('nextMonthResults');
+    const adminControls = document.getElementById('adminControls');
+    const clearAvailabilityButton = document.getElementById('clearAvailabilityButton');
+    const removeUserSelect = document.getElementById('removeUserSelect');
+    const removeUserButton = document.getElementById('removeUserButton');
+    const availabilityGrid = document.getElementById('availabilityGrid');
+    const calendar = document.getElementById('calendar');
+    
+    // Update UI on login state
+    const updateUI = () => {
+      if (appData.currentUser) {
+        loginContainer.style.display = 'none';
+        appContainer.style.display = 'grid';
+        userWelcome.textContent = `Welcome, ${appData.currentUser}!`;
+        
+        // If admin123, show admin controls and populate user removal dropdown
+        if (appData.currentUser === "admin123") {
+          adminControls.style.display = 'block';
+          populateRemoveUserSelect();
+        } else {
+          adminControls.style.display = 'none';
+        }
+        
+        // Load current user's dates if they exist
+        if (appData.users[appData.currentUser] && appData.users[appData.currentUser].dates) {
+          selectedDates = appData.users[appData.currentUser].dates;
+        } else {
+          selectedDates = [];
+        }
+        
+        renderCalendar();
+        updateHeatmap();
+      } else {
+        loginContainer.style.display = 'block';
+        appContainer.style.display = 'none';
+        usernameInput.value = '';
+      }
+    };
+    
+    // Login
+    const login = () => {
+      const username = usernameInput.value.trim();
+      if (username) {
+        appData.currentUser = username;
+        if (!appData.users[username]) {
+          appData.users[username] = { dates: [] };
+        }
+        saveData();
+        updateUI();
+      }
+    };
+    
+    // Logout
+    const logout = () => {
+      appData.currentUser = null;
+      saveData();
+      updateUI();
+    };
+    
+    // Left calendar: Render user's editable calendar using currentDate
+    let selectedDates = [];
+    const renderCalendar = () => {
+      calendar.innerHTML = '';
+      const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+      dayNames.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day day-header';
+        dayHeader.textContent = day;
+        calendar.appendChild(dayHeader);
+      });
+      const monthStart = moment(currentDate).startOf('month');
+      const monthEnd = moment(currentDate).endOf('month');
+      const startDate = moment(monthStart).startOf('week');
+      const endDate = moment(monthEnd).endOf('week');
+      currentMonthElement.textContent = currentDate.format('MMMM YYYY');
+      
+      let isSelecting = false, isAdding = true;
+      let day = moment(startDate);
+      while(day <= endDate) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        const dateStr = day.format('YYYY-MM-DD');
+        
+        const dateNumber = document.createElement('span');
+        dateNumber.className = 'date-number';
+        dateNumber.textContent = day.date();
+        dayElement.appendChild(dateNumber);
+        
+        if (day.month() !== currentDate.month()) {
+          dayElement.classList.add('inactive-day');
+        } else {
+          if (selectedDates.includes(dateStr)) {
+            dayElement.classList.add('selected-day');
+          }
+          dayElement.dataset.date = dateStr;
+          dayElement.addEventListener('mousedown', (e) => {
+            isSelecting = true;
+            const dStr = e.target.closest('.calendar-day').dataset.date;
+            isAdding = !selectedDates.includes(dStr);
+            if (isAdding) {
+              if (!selectedDates.includes(dStr)) {
+                selectedDates.push(dStr);
+                e.target.closest('.calendar-day').classList.add('selected-day');
+              }
+            } else {
+              const idx = selectedDates.indexOf(dStr);
+              if (idx !== -1) {
+                selectedDates.splice(idx, 1);
+                e.target.closest('.calendar-day').classList.remove('selected-day');
+              }
+            }
+            e.preventDefault();
+          });
+          dayElement.addEventListener('mouseenter', (e) => {
+            if (!isSelecting) return;
+            const dStr = e.target.closest('.calendar-day').dataset.date;
+            if (isAdding) {
+              if (!selectedDates.includes(dStr)) {
+                selectedDates.push(dStr);
+                e.target.closest('.calendar-day').classList.add('selected-day');
+              }
+            } else {
+              const idx = selectedDates.indexOf(dStr);
+              if (idx !== -1) {
+                selectedDates.splice(idx, 1);
+                e.target.closest('.calendar-day').classList.remove('selected-day');
+              }
+            }
+          });
+        }
+        calendar.appendChild(dayElement);
+        day.add(1, 'day');
+      }
+      document.addEventListener('mouseup', () => { isSelecting = false; });
+      calendar.addEventListener('mouseleave', () => { isSelecting = false; });
+    };
+    
+    // Change left calendar month
+    const changeMonth = (delta) => {
+      currentDate = moment(currentDate).add(delta, 'month');
+      renderCalendar();
+    };
+    
+    // Save availability: update current user's dates, show notification
+    const saveAvailability = () => {
+      if (!appData.currentUser) return;
+      selectedDates.sort();
+      appData.users[appData.currentUser].dates = selectedDates;
+      saveData();
+      updateHeatmap();
+      // Show notification for 2 seconds
+      saveNotification.style.display = 'block';
+      setTimeout(() => { saveNotification.style.display = 'none'; }, 2000);
+    };
+    
+    // Heatmap view: update group availability based on resultsDate (independent of left calendar)
+    const updateHeatmap = () => {
+      // Count availability only among non-admin users.
+      const nonAdminUsers = Object.keys(appData.users).filter(u => u !== "admin123");
+      const totalNonAdmin = nonAdminUsers.length;
+      // Update the results month header using resultsDate.
+      currentMonthResultsElement.textContent = resultsDate.format('MMMM YYYY');
+      
+      // Get month info from resultsDate.
+      const monthStart = moment(resultsDate).startOf('month');
+      const monthEnd = moment(resultsDate).endOf('month');
+      const startDate = moment(monthStart).startOf('week');
+      const endDate = moment(monthEnd).endOf('week');
+      
+      // Build availability map from non-admin users.
+      const availabilityMap = {};
+      nonAdminUsers.forEach(username => {
+        if (appData.users[username] && appData.users[username].dates) {
+          appData.users[username].dates.forEach(date => {
+            availabilityMap[date] = (availabilityMap[date] || 0) + 1;
+          });
+        }
+      });
+      
+      // Clear heatmap grid and add day headers.
+      availabilityGrid.innerHTML = '';
+      const dayNames = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+      dayNames.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'availability-cell';
+        dayHeader.style.backgroundColor = '#edf2f7';
+        dayHeader.style.color = '#4a5568';
+        dayHeader.style.textAlign = 'center';
+        dayHeader.style.fontWeight = 'bold';
+        dayHeader.style.fontSize = '0.75rem';
+        dayHeader.textContent = day;
+        availabilityGrid.appendChild(dayHeader);
+      });
+      
+      let day = moment(startDate);
+      while(day <= endDate) {
+        const cell = document.createElement('div');
+        cell.className = 'availability-cell';
+        
+        const dateNumber = document.createElement('span');
+        dateNumber.className = 'availability-date';
+        dateNumber.textContent = day.date();
+        cell.appendChild(dateNumber);
+        
+        const dStr = day.format('YYYY-MM-DD');
+        const count = availabilityMap[dStr] || 0;
+        // Calculate percentage among non-admin users.
+        const percentage = totalNonAdmin > 0 ? Math.round((count / totalNonAdmin) * 100) : 0;
+        
+        if (day.month() !== resultsDate.month()) {
+          cell.style.backgroundColor = '#edf2f7';
+          cell.style.color = '#a0aec0';
+        } else if (percentage === 0) {
+          cell.style.backgroundColor = '#edf2f7';
+        } else if (percentage < 33) {
+          cell.style.backgroundColor = '#c6f6d5';
+        } else if (percentage < 67) {
+          cell.style.backgroundColor = '#9ae6b4';
+        } else if (percentage < 100) {
+          cell.style.backgroundColor = '#68d391';
+        } else {
+          cell.style.backgroundColor = '#2f855a';
+        }
+        
+        if (day.month() === resultsDate.month()) {
+          cell.title = `${day.format('MMM D')}: ${percentage}% available (non‑admin)`;
+          cell.style.cursor = 'pointer';
+          cell.addEventListener('click', () => {
+            const available = [];
+            nonAdminUsers.forEach(username => {
+              if (appData.users[username].dates && appData.users[username].dates.includes(dStr)) {
+                available.push(username);
+              }
+            });
+            if (available.length > 0) {
+              alert(`Available on ${day.format('MMM D')}:\n${available.join(', ')}`);
+            } else {
+              alert(`No users available on ${day.format('MMM D')}`);
+            }
+          });
+        }
+        
+        availabilityGrid.appendChild(cell);
+        day.add(1, 'day');
+      }
+    };
+    
+    // Change group availability month (resultsDate)
+    const changeResultsMonth = (delta) => {
+      resultsDate = moment(resultsDate).add(delta, 'month');
+      updateHeatmap();
+    };
+    
+    // Admin: Populate select dropdown with non-admin users for removal.
+    const populateRemoveUserSelect = () => {
+      removeUserSelect.innerHTML = '';
+      Object.keys(appData.users).forEach(username => {
+        if (username !== "admin123") {
+          const opt = document.createElement('option');
+          opt.value = username;
+          opt.textContent = username;
+          removeUserSelect.appendChild(opt);
+        }
+      });
+    };
+    
+    // Admin: Remove selected non-admin user.
+    removeUserButton.addEventListener('click', () => {
+      const userToRemove = removeUserSelect.value;
+      if (userToRemove && confirm(`Remove user ${userToRemove}? This will delete their availability data.`)) {
+        delete appData.users[userToRemove];
+        saveData();
+        populateRemoveUserSelect();
+        updateHeatmap();
+        alert(`User ${userToRemove} has been removed.`);
+      }
+    });
+    
+    // Admin: Clear all non-admin users.
+    clearAvailabilityButton.addEventListener('click', () => {
+      if (confirm("Are you sure you want to remove all non‑admin users?")) {
+        Object.keys(appData.users).forEach(username => {
+          if (username !== "admin123") {
+            delete appData.users[username];
+          }
+        });
+        saveData();
+        populateRemoveUserSelect();
+        updateHeatmap();
+        alert("All non‑admin users have been removed.");
+      }
+    });
+    
+    // Event listeners for navigation
+    loginButton.addEventListener('click', login);
+    logoutButton.addEventListener('click', logout);
+    saveButton.addEventListener('click', saveAvailability);
+    prevMonthButton.addEventListener('click', () => changeMonth(-1));
+    nextMonthButton.addEventListener('click', () => changeMonth(1));
+    prevMonthResultsButton.addEventListener('click', () => changeResultsMonth(-1));
+    nextMonthResultsButton.addEventListener('click', () => changeResultsMonth(1));
+    
+    window.addEventListener('load', () => {
+      loadData();
+      updateUI();
+    });
+  </script>
+</body>
+</html>
